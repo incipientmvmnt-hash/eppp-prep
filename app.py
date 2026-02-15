@@ -336,9 +336,29 @@ elif st.session_state.page == "results":
                     st.markdown(f"**Correct answer:** {q['correct_answer']}")
                     st.markdown(f'<div class="explanation-box">💡 {q["explanation"]}</div>', unsafe_allow_html=True)
 
-        if st.button("🔄 Take Another Quiz", use_container_width=True):
-            go("quiz_setup")
-            st.rerun()
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("🔄 Take Another Quiz", use_container_width=True):
+                go("quiz_setup")
+                st.rerun()
+        with col_b:
+            if st.button("⚡ Quick Restart (Same Settings)", use_container_width=True):
+                # Re-shuffle same pool, restart immediately
+                domain = st.session_state.quiz_domain
+                num_q = len(qs)
+                if domain == "All Domains":
+                    pool = questions[:]
+                else:
+                    dnum = int(domain.split(":")[0].replace("Domain ", ""))
+                    pool = [q for q in questions if q["domain_num"] == dnum]
+                random.shuffle(pool)
+                st.session_state.quiz_questions = pool[:num_q]
+                st.session_state.quiz_index = 0
+                st.session_state.quiz_answers = {}
+                st.session_state.quiz_submitted = {}
+                st.session_state.quiz_complete = False
+                go("quiz")
+                st.rerun()
 
 # ── STUDY MODE ───────────────────────────────────────────────────────────────
 elif st.session_state.page == "study":
